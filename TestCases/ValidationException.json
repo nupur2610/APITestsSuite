@@ -1,0 +1,88 @@
+﻿{
+  "Standard :Valid ValidationExceptionRequest": {
+    "api": [
+      {
+        "name": "starting Orchestration",
+        "request": {
+          "baseUrl": "RuleEngineOrchestrator",
+          "url": "/api/simulation/CreateOrchestration?orchestrationName=ReferralAuthorizationOrchestration&eventName=ReferralAuthRequest",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Some auth token"
+          },
+          "body":  {
+            "sourceSystem": "csrd",
+            "referralId": 2349691,
+            "payerId": 1173467,
+            "lineItems": [
+              {
+                "referralLineItemId": 9465010,
+                "productId": 37520,
+                "productNumber": "18-812-37188",
+                "productName": "GATE, TOP LANDING - W/INTERLOCK"
+              }
+            ],
+            "createdBy": "caubry",
+            "createdTime": "2020-12-02T17:12:45.433Z"
+          }
+        },
+        "response": {
+          "saveValue": "$.instanceId",
+          "status_code": "202",
+          "headers": {}
+        }
+      }
+    ,
+      {
+        "name": "Check Rule Execution",
+        "request": {
+          "baseUrl": "RuleEngineOrchestrator",
+          "url": "/api/instances/$$$.instanceId/state",
+          "method": "GET",
+          "pollUntil": {
+            "path":"$.current.status.referral.products[0].validationFailures",
+            "value":"LOMN Document is missing"},
+          "headers":   {
+            "Authorization": "Some auth token"
+          }
+
+        },
+        "response": {
+          "status_code": "200",
+          "headers": {},
+          "compareResponse": "$.current.status.referral.products",
+          "body": [
+            {
+              "referralLineItemId": 9465010,
+              "productId": 9465010,
+              "productNumber": "18-812-37188",
+              "description": "GATE, TOP LANDING - W/INTERLOCK",
+              "authStatus": "Pending",
+              "authReason": "Per Customer Business Rules",
+              "ruleEvalOutcome": "LOMNAuthorization,CCMUAuthorization",
+              "validationFailures": [
+                "LOMN Document is missing"
+              ],
+              "missingMandatoryFields": [],
+              "sellPrice": 13.0,
+              "carrierContractedPrice": null,
+              "sellPriceOverrideReason": "Concession - Payer not adhering to contracted rate",
+              "lineOfBusiness": "DME",
+              "code": "E1399",
+              "rliFrequency": null,
+              "rliFrequencyUnit": null,
+              "rliQuantity": 1.0,
+              "orderUOM": "Each",
+              "duration": null,
+              "isRental": false,
+              "isStat": false,
+              "serviceStartDate": "2021-01-21T00:00:00",
+              "serviceEndDate": "2021-01-21T00:00:00",
+              "authStatusChangedTime": null
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

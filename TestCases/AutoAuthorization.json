@@ -1,0 +1,138 @@
+{
+  "Standard :Valid AutoAuthRequest": {
+    "api": [
+      {
+        "name": "starting Orchestration",
+        "request": {
+          "baseUrl": "RuleEngineOrchestrator",
+          "url": "/api/simulation/CreateOrchestration?orchestrationName=ReferralAuthorizationOrchestration&eventName=ReferralAuthRequest",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Some auth token"
+          },
+          "body":  {
+            "sourceSystem": "csrd",
+            "referralId": 2349913,
+            "payerId": 1173467,
+            "lineItems": [
+              {
+                "referralLineItemId": 9464484,
+                "productId": 6615,
+                "productNumber": "04-204-00001",
+                "productName": "LPN VISIT - VISIT"
+              }
+            ],
+            "createdBy": "caubry",
+            "createdTime": "2020-12-15T07:36:32Z"
+          }
+        },
+        "response": {
+          "saveValue": "$.instanceId",
+          "status_code": "202",
+          "headers": {}
+        }
+      }
+    ,
+      {
+        "name": "Check Rule Execution",
+        "request": {
+          "baseUrl": "RuleEngineOrchestrator",
+          "url": "/api/instances/$$$.instanceId/state",
+          "method": "GET",
+          "pollUntil": 
+          {
+            "path":"$.current.status.referral.products[0].ruleEvalOutcome",
+            "value":"AutoAuthorized"
+          },
+          "headers":   {
+            "Authorization": "Some auth token"
+          }
+
+        },
+        "response": {
+          "status_code": "200",
+          "headers": {},
+          "compareResponse": "$.current.status.referral.products",
+          "body":  [
+            {
+              "referralLineItemId": 9464484,
+              "productId": 9464484,
+              "productNumber": "04-204-00001",
+              "description": "LPN VISIT - VISIT",
+              "authStatus": "Authorized",
+              "authReason": "Per Customer Business Rules",
+              "ruleEvalOutcome": "AutoAuthorized",
+              "validationFailures": [],
+              "missingMandatoryFields": [],
+              "sellPrice": 109.55,
+              "carrierContractedPrice": 175.68,
+              "sellPriceOverrideReason": null,
+              "lineOfBusiness": "HH",
+              "code": "S9124",
+              "rliFrequency": "1",
+              "rliFrequencyUnit": "A_DAY",
+              "rliQuantity": 1.0,
+              "orderUOM": "Visit",
+              "duration": null,
+              "isRental": false,
+              "isStat": false,
+              "serviceStartDate": "2021-01-05T00:00:00",
+              "serviceEndDate": "2021-01-05T00:00:00",
+              "authStatusChangedTime": null
+            }
+          ]
+        }
+      },
+      {
+        "name": "Check Rule Completion",
+        "request": {
+          "comparePath": "",
+          "baseUrl": "RuleEngineOrchestrator",
+          "url": "/api/instances/$$$.instanceId/state",
+          "method": "GET",
+          "pollUntil": {
+            "path": "$.current.output",
+            "value": "SuccessAllAutoAuthorized"
+          },
+          "headers": {
+            "Authorization": "Some auth token"
+          }
+        },
+        "response": {
+          "status_code": "200",
+          "headers": {},
+          "body": {}
+        },
+        "checkEvent": {
+            "Type": "ReferralAuthorizationEvaluated",
+            "ReferralId": "2349913",
+            "data": {
+              "referralId": 2349913,
+              "payerId": 3598822,
+              "lineItems": [
+                {
+                  "referralLineItemId": 9464484,
+                  "productId": 9464484,
+                  "productNumber": "04-204-00001",
+                  "productName": "LPN VISIT - VISIT",
+                  "authStatus": "Authorized",
+                  "authReason": "Per Customer Business Rules",
+                  "evalOutCome": "AutoAuthorized",
+                  "validationFailureReasons": [],
+                  "missingMandatoryFields": [],
+                  "sellPrice": 109.55,
+                  "carrierContractedPrice": 175.68,
+                  "rliQuantity": 1.0,
+                  "unitOfMeasure": "Visit",
+                  "isRental": false,
+                  "createdTime": null,
+                  "authStatusChangedTime": null
+                }
+              ]
+            }
+          
+        }
+      }
+    ]
+  }
+}

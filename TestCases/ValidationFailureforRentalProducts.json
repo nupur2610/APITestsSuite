@@ -1,0 +1,89 @@
+﻿{
+  "Standard :Valid ValidationExceptionRequest": {
+    "api": [
+      {
+        "name": "starting Orchestration",
+        "request": {
+          "baseUrl": "RuleEngineOrchestrator",
+          "url": "/api/simulation/CreateOrchestration?orchestrationName=ReferralAuthorizationOrchestration&eventName=ReferralAuthRequest",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Some auth token"
+          },
+          "body":{
+            "sourceSystem": "csrd",
+            "referralId": 2349924,
+            "payerId": 1173467,
+            "lineItems": [
+              {
+                "referralLineItemId": 9465013,
+                "productId": 1668,
+                "productNumber": "15-1701-00012",
+                "productName": "LOW AIR: LOSS MATTRESS, STANDAR:"
+              }
+            ],
+            "createdBy": "caubry",
+            "createdTime": "2020-12-16T10:04:32Z"
+          }
+          },
+        "response": {
+          "saveValue": "$.instanceId",
+          "status_code": "202",
+          "headers": {}
+        }
+      }
+    ,
+      {
+        "name": "Check Rule Execution ",
+        "request": {
+          "baseUrl": "RuleEngineOrchestrator",
+          "url": "/api/instances/$$$.instanceId/state",
+          "method": "GET",
+          "pollUntil": {
+            "path":"$.current.status.referral.products[0].validationFailures[0]",
+            "value":"Initial Rental Limit Validation Failed: Product RLIQuantity is not within configured initial rental auth limit or the unit of measure is not Day/Month."
+          },
+          "headers":   {
+            "Authorization": "Some auth token"
+          }
+
+        },
+        "response": {
+          "status_code": "200",
+          "headers": {},
+          "compareResponse": "$.current.status.referral.products",
+          "body": [
+            {
+              "referralLineItemId": 9465013,
+              "productId": 9465013,
+              "productNumber": "15-1701-00012",
+              "description": "LOW AIR: LOSS MATTRESS, STANDAR:",
+              "authStatus": "Pending",
+              "authReason": "Per Customer Business Rules",
+              "ruleEvalOutcome": "LOMNAuthorization",
+              "validationFailures": [
+                "Initial Rental Limit Validation Failed: Product RLIQuantity is not within configured initial rental auth limit or the unit of measure is not Day/Month."
+              ],
+              "missingMandatoryFields": [],
+              "sellPrice": 36.74,
+              "carrierContractedPrice": null,
+              "sellPriceOverrideReason": null,
+              "lineOfBusiness": "DME",
+              "code": "E0277",
+              "rliFrequency": null,
+              "rliFrequencyUnit": null,
+              "rliQuantity": 150.0,
+              "orderUOM": "Day",
+              "duration": null,
+              "isRental": true,
+              "isStat": false,
+              "serviceStartDate": "2021-01-21T00:00:00",
+              "serviceEndDate": "2021-06-19T00:00:00",
+              "authStatusChangedTime": null
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
